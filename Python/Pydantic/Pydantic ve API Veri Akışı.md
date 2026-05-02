@@ -42,3 +42,12 @@ class BookAndLogCreate(BaseModel):
     read_month: int = Field(ge=1, le=12)
     read_year: int | None = Field(ge=1900, le=date.today().year)
 ```
+
+
+### model_config = {"from_attributes": True}
+
+>[!important] Veritabanı Tablosunun kendisini yolluyorsak kullanmak şarttır.
+
+Pydantic gelen veriyi JSON/sözlük formatında görmezse hata verir. Örneğin eğer veri obje ise from_attributes=True bunları okumaya yarar. 
+
+İç içe verilerde özellikle object de geldiği için bu ayar sadece ana objeyi değil içindeki objeyi tanımayı ve onu da otomatik olarak JSON şemasına dönüştürmeyi sağlar.
