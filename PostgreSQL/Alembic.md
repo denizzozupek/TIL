@@ -2,7 +2,7 @@
 
 Bu konu zaten SQLAlchemy tarafinda detayli tutuluyor:
 
-- [[../SQLAlchemy/Alembic]]
+- [[../Python/SQLAlchemy/Alembic]]
 
 PostgreSQL baglaminda ozet:
 

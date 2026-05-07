@@ -2,7 +2,7 @@
 
 Bu konu SQLAlchemy klasorunde detayli tutuluyor:
 
-- [[../SQLAlchemy/ORM ve SQLALCHEMY ve psycopg2]]
+- [[../Python/SQLAlchemy/ORM ve SQLALCHEMY ve psycopg2]]
 
 PostgreSQL baglaminda kisa ozet:
 
