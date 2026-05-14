@@ -1,0 +1,6 @@
+**Tarih:** 14.05.2026
+**Etiketler:** #embedding #vectors #wordembedding
+
+**Kelimeleri neden vektöre çeviriyoruz yani neden vektörlere gömüyoruz? (Why we embedding words into vectors?)** Çünkü bilgisayar direkt olarak insan dilini algılayamıyor. İnsan dilini algılayabilmesi için onu bilgisayarın anlayabileceği nümerik bir formata çeviriyoruz. Bu sayede bilgisayar vektörlerin birbirine mesafe olarak yakınlığına göre anlamlarının da yakın olduğunu anlıyor. Çünkü benzer kelimeler, kavramlar ve tanımlar yüksek boyutlu uzayda birbirine yakın konumlanıyor. Örneğin kedi ve köpek kelimeleri birbirlerine yakın konumlanırken, masa kelimesi onlardan daha uzakta yer alıyor. Bu sayede herhangi bir rastgele girdi elde etmek bunu vektöre dönüştürmek ve bu vektörü ona benzer şeyleri bulmak için kullanabiliriz.
+
+Kelimeleri vektörlere dönüştürmek için modeller (word2vec, openai vs.) kullanılır. Her model kendi vektör uzaylarında farklı şeyleri farklı kodlarlar. Bu yüzden aynı kelimeyi farklı modellerde ararsak farklı sonuç elde edebiliriz. 
