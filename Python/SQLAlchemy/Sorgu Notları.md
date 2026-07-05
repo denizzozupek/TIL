@@ -1,7 +1,8 @@
 
-1) notin_ kullanarak dahil kullanılan parametrenin where sorgusuyla dahil olmamasını sağlarız.
+1) `notin_` ile belirli değerleri hariç tutarız:
+
 ```python
-where(Book.genre.notin_(["Çizgi Roman", "Manga"])
+query = select(Book).where(Book.genre.notin_("Çizgi Roman", "Manga"))
 ```
 
 
@@ -23,11 +24,11 @@ where(Book.genre.notin_(["Çizgi Roman", "Manga"])
 5) `.label()`, veritabanı sorgusunda bir kolona veya hesaplanmış bir değere **geçici bir takma ad  vermek** için kullanılır.
 
 
-6) PostreSQL C diliyle yazıldığı için bu tarz tarih aramalarında func.date_part ile "month", "year", "day" aramak yeterli olacaktır.
+6) PostgreSQL C diliyle yazılmıştır; tarih tabanlı parçalarda `func.date_part` işe yarar:
 
-   ```python
-   func.date_part("month", ReadLog.read_date).label("month")
-   ```
+```python
+func.date_part("month", ReadLog.read_date).label("month")
+```
 
 
 7) Sorgudan dönen tuple verileri, Pydantic’in beklediği response modeline uygun olması için liste içinde sözlüklere dönüştürülür

@@ -10,12 +10,12 @@ from app.database import get_db
 
 @pytest.fixture
 def client(db_session):
-    def override_get_db():
-        yield db_session
+	def override_get_db():
+		yield db_session
 
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as c:
-        yield c
+	app.dependency_overrides[get_db] = override_get_db
+	with TestClient(app) as c:
+		yield c
 ```
 
 Testler genelde Hazırlık Eylem ve Assert olarak üçe ayrılır. Eylem kısmında crud kullanılmaz onun yerine client.delete client.post yani TestClient Kullanılır.
@@ -33,6 +33,36 @@ Testler genelde Hazırlık Eylem ve Assert olarak üçe ayrılır. Eylem kısmı
 - `create_engine()` içine `connect_args={"check_same_thread": False}` ekledim.
 - `poolclass=StaticPool` kullandım.
 
+Örnek `conftest.py` (in-memory sqlite için):
+
+```python
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+
+from app.database import Base, get_db
+
+@pytest.fixture(scope='session')
+def engine():
+	return create_engine(
+		'sqlite:///:memory:',
+		connect_args={"check_same_thread": False},
+		poolclass=StaticPool,
+	)
+
+@pytest.fixture(scope='function')
+def db_session(engine):
+	Base.metadata.create_all(engine)
+	Session = sessionmaker(bind=engine)
+	session = Session()
+	try:
+		yield session
+	finally:
+		session.close()
+		Base.metadata.drop_all(engine)
+```
+
 ## Neden?
 
 - `check_same_thread=False` SQLite’ın bağlantıyı farklı thread’lerde kullanmasına izin veriyor.
@@ -43,6 +73,8 @@ Testler genelde Hazırlık Eylem ve Assert olarak üçe ayrılır. Eylem kısmı
 - `client.post(..., json=model)` yerine `json=model.model_dump()` kullandım.
 - Böylece Pydantic modelini JSON’a çevirmeden gönderme hatası çözüldü.
 - Response verisini de sözlük gibi okudum: `data["book"]["title"]`
+
+Not: Pydantic v1 kullanıyorsanız `model.dict()`; v2 kullanıyorsanız `model.model_dump()` tercih edin.
 
 ## Sonuç
 

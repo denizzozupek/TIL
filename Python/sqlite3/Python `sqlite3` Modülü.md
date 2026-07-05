@@ -42,7 +42,7 @@ with sqlite3.connect("app.db") as connection:
         )
     """)
     connection.commit() # Değişiklikleri kaydet
-````
+```
 
 ### 2. Veri Ekleme (SQL Injection'dan Korunarak!)
 
@@ -95,7 +95,7 @@ except sqlite3.Error as e:
 finally:
     connection.close() # with kullanılmadığı için manuel kapat
 
-````
+```
 ---
 
 ## 🧠 Senior Mimari Notları (Gerçek Dünya Senaryoları)
@@ -120,7 +120,7 @@ kayit = cursor.fetchone()
 # 🔴 YAZMA (UPDATE) ÖRNEĞİ: Cursor'a gerek yok, Commit şart!
 conn.execute("UPDATE summaries SET status = 'completed' WHERE video_id = ?", (v_id,))
 conn.commit()
-````
+```
 
 ### 6. Asenkron Mimaride "Vur-Kaç" Taktiği (Database Locking Önlemi)
 

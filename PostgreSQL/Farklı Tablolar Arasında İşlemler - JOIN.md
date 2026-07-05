@@ -1,17 +1,15 @@
-
-
-```SQL
+```sql
+SELECT *
 FROM birinci_tablo
-JOIN ikinci_tablOB ON birinci_tablo.ortak_sutun = ikinci_tablo.ortak_sutun
+JOIN ikinci_tablo ON birinci_tablo.ortak_sutun = ikinci_tablo.ortak_sutun;
 ```
 
+1. Çekilecek veriler (`SELECT`): Hangi sütunları görmek istiyorsunuz? İki farklı tabloda çalışırken sütun isimlerinin önüne tablo adını yazmak isim çakışmasını önler. Örnek: `SELECT tablo1.sutun_adi, tablo2.sutun_adi`.
 
-**1. Çekilecek Veriler (`SELECT`)** Hangi sütunları görmek istiyorsun? İki farklı tabloda çalıştığımız için, sütun isimlerinin başına hangi tablodan geldiklerini belirtmek (isim çakışmalarını önlemek için) standart bir mühendislik pratiğidir. _Kural:_ `SELECT tablo1.sutun_adi, tablo2.sutun_adi`
+2. Ana tablo (`FROM`): Sorgunun merkezine hangi tabloyu koyduğunuz.
 
-**2. Ana Tablo (`FROM`)** Sorgunun merkezine hangi tabloyu koyuyorsun? _Kural:_ `FROM tablo1`
+3. Birleştirilecek tablo (`JOIN`): Hangi tabloyu eklediğiniz.
 
-**3. Birleştirilecek Tablo (`JOIN`)** Sisteme hangi yeni tabloyu dahil ediyorsun? _Kural:_ `JOIN tablo2`
+4. Kesişim şartı (`ON`): İki tablodaki satırların eşleşme koşulu (genelde PK = FK).
 
-**4. Kesişim Şartı (`ON`)** Bu iki tablodaki satırlar birbirini hangi sütunlardaki veri eşitliğine bakarak bulacak? (Primary Key = Foreign Key mantığı). _Kural:_ `ON tablo1.anahtar_sutun = tablo2.yabanci_anahtar_sutun`
-
-**5. Filtreleme (`WHERE`)** Birleştirme işlemi bittikten ve ortaya devasa tek bir sanal tablo çıktıktan sonra, hangi satırları eleyeceksin? (Filtreler her zaman birleştirmeden sonra yazılır). _Kural:_ `WHERE tablo2.filtre_sutunu = deger`
+5. Filtreleme (`WHERE`): Birleştirmeden sonra hangi satırları eleyeceğiniz. Örnek: `WHERE tablo2.filtre_sutunu = deger`.

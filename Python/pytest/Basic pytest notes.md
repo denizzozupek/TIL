@@ -1,8 +1,26 @@
 
-Pytest fixture'ları, ==testlerin çalıştırılmasından önce veya sonra veritabanı bağlantıları, sahte nesneler (mock) veya test verileri gibi ön koşulları hazırlayan, yeniden kullanılabilir fonksiyonlardır==. `@pytest.fixture` dekoratörü ile tanımlanırlar ve test fonksiyonlarına argüman olarak geçirilerek sürdürülebilir, temiz ve modüler test kodları yazılmasını sağlarlar. [](https://translate.google.com/translate?u=https://docs.pytest.org/en/stable/explanation/fixtures.html&hl=tr&sl=en&tl=tr&client=sge)
+Pytest'te `fixture`lar, testlerden önce veya sonra çalışacak hazırlık/temizlik (setup/teardown) kodlarını paylaşmak için kullanılır. `@pytest.fixture` ile tanımlanır ve test fonksiyonlarına argüman olarak verilebilir.
 
-**Pytest Fixture Özellikleri ve Kullanım Örnekleri**
+Basit örnek:
 
-- **Ön/Son İşlemler:** Test öncesi kurulum (setup) ve test sonrası temizlik (teardown) işlemlerini otomatikleştirirler.
-- **Veri Sağlama:** Testlere sabit veya dinamik veriler iletir.
-- **Kapsam (Scope):** Fixture'ların ne sıklıkla çalışacağını belirler (fonksiyon, sınıf, modül veya oturum bazlı).
+```python
+import pytest
+
+@pytest.fixture
+def sample_data():
+	# setup
+	data = {"a": 1, "b": 2}
+	yield data
+	# teardown (cleanup) - örneğin veritabanı temizleme
+
+def test_sum(sample_data):
+	assert sample_data["a"] + sample_data["b"] == 3
+```
+
+Özellikler:
+
+- **Setup/Teardown:** Fixture içinde `yield` kullandığınızda `yield` öncesi setup, sonrasında teardown kodu çalışır.
+- **Veri sağlama:** Testlere sabit veya dinamik veri gönderirler.
+- **Scope:** `scope` parametresiyle `function`, `class`, `module` veya `session` gibi çalıştırma sıklığı belirlenebilir.
+
+Detaylı dokümantasyon için pytest fixtures sayfasına bakılabilir; not olarak doğrudan uzun URL koymak yerine kısa örnekler faydalıdır.

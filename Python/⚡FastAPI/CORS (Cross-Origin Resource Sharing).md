@@ -26,5 +26,11 @@ app.add_middleware(
     # ["*"] demek: "İstedikleri tüm başlık bilgilerini kargoya koyup gönderebilirler, kısıtlama yok."
     allow_headers=["*"],
 )
+
+Notlar:
+
+- Tarayıcılar `preflight` (OPTIONS) isteği yaparak CORS politikalarını kontrol eder; server bu isteğe uygun başlıklarla cevap vermelidir.
+- Geliştirme aşamasında `allow_origins=["*"]` kolaydır ama üretimde kesinlikle spesifik domain(ler) yazın.
+- `allow_credentials=True` ile `allow_origins` olarak `"*"` kullanmak tarayıcı tarafından engellenebilir; ikisini birlikte kullanırken dikkatli olun.
 ```
 

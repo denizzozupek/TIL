@@ -1,15 +1,14 @@
-#postresql #database 
-**Verileri Toplama**
+# postgresql #database
 
-```SQL
+## Verileri toplama
 
+```sql
 SELECT SUM(sutun_adi) FROM tablo_adi;
 ```
 
-**Koşula göre veri sayma**
+## Koşula göre veri sayma
 
-
-```SQL
+```sql
 SELECT COUNT(*) FROM tablo_adi WHERE kosul;
 ```
 
@@ -25,19 +24,20 @@ Aşağıdaki komut, tablodaki en yüksek ID'yi bulur ve otomatik sayacı o sayı
 
 
 
-```SQL
+
+```sql
 SELECT setval(
-    pg_get_serial_sequence('tablo_adi', 'id_sutunu'), 
-    (SELECT MAX(id_sutunu) FROM tablo_adi)
+	pg_get_serial_sequence('tablo_adi', 'id_sutunu'),
+	(SELECT COALESCE(MAX(id_sutunu), 0) FROM tablo_adi)
 );
 ```
 
 ### Örnek (read_log tablosu için):
 
 
-```SQL
 
-SELECT setval(pg_get_serial_sequence('read_log', 'id'), (SELECT MAX(id) FROM read_log));
+```sql
+SELECT setval(pg_get_serial_sequence('read_log', 'id'), (SELECT COALESCE(MAX(id), 0) FROM read_log));
 ```
 
 ---
@@ -46,11 +46,12 @@ SELECT setval(pg_get_serial_sequence('read_log', 'id'), (SELECT MAX(id) FROM rea
 
 ### Gruplama ve Sıralama
 
-```SQL
-SELECT genre, COUNT(*) 
-FROM read_log 
+
+```sql
+SELECT genre, COUNT(*)
+FROM read_log
 WHERE genre != 'Çizgi Roman'
-GROUP BY genre 
+GROUP BY genre
 ORDER BY COUNT(*) DESC;
 ```
 
@@ -60,13 +61,10 @@ ORDER BY COUNT(*) DESC;
 
 ## SUBQUERY
 
-```SQL
-SELECT title, page_count FROM read_log 
-WHERE 
-	page_count > (
-	SELECT
-			AVG(page_count)
-		FROM
-			read_log
-	);
+
+```sql
+SELECT title, page_count FROM read_log
+WHERE page_count > (
+	SELECT AVG(page_count) FROM read_log
+);
 ```
