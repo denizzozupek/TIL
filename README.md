@@ -1,4 +1,4 @@
-1. **[Python Notes](Python)**
-2. **[Book Notes](Books/AI)**
-3. **[Docker Notes](Docker)**
-4. **[PostreSQL Notes](PostreSQL)**
+1. <h1>**[Python Notes](Python)**</h1>
+2. <h1>**[Book Notes](Books/AI)**</h1>
+3. <h1>**[Docker Notes](Docker)**</h1>
+4. <h1>**[PostreSQL Notes](PostreSQL)**</h1>
