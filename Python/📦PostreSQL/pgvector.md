@@ -3,39 +3,38 @@
 
 ### Kurulum
 
-Uzantıyı etkinleştirin:
+Uzantıyı çalıştırıyoruz.
 
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
+```SQL
+CREATE EXTENSION vector IF NOT EXISTS vector;
 ```
 
-Örnek: 3 boyutlu embedding kolonu ile tablo oluşturma
+3 boyutta vektör column ile bir tablo oluşturuyoruz.
 
-```sql
-CREATE TABLE items (
-	id bigserial PRIMARY KEY,
-	embedding vector(3)
-);
+```SQL
+CREATE TABLE items(id bigserial PRIMARY KEY, embedding vector(3))
 ```
 
-Kayıt ekleme:
+Tabloya vektör ekliyoruz.
 
-```sql
-INSERT INTO items(embedding) VALUES ('[1,2,3]'), ('[4,5,6]');
-```
+ ```SQL
+ INSERT INTO items(embedding) values ('[1,2,3]'), ('[4,5,6]')
+ ```
 
-Benzerlik sıralaması (en yakın 5):
+Mesafeyi (Distance) Kullanarak sorgu yapıyoruz.
 
-```sql
+```SQL 
 SELECT * FROM items ORDER BY embedding <=> '[3,1,2]' LIMIT 5;
 ```
 
-Mesafe hesaplama:
+Şimdi aralarındaki mesafeyi soruyoruz.
 
-```sql
-SELECT embedding <=> '[3,1,2]' AS distance FROM items;
+```SQL
+SELECT embedding <=> '[3,1,2]' AS distance FROM items
 ```
 
-Notlar:
-- `<=>` operatörü genelde cosine veya L2 bazlı mesafe sağlar; sürüme göre davranış değişebilir — dokümantasyonu kontrol edin.
-- HNSW (pgvector içinde `ivfflat`/`hnsw` gibi metodlar) büyük veri setlerinde hızlı nearest-neighbor aramaları sağlar.
+> [!info]
+>  <=> Kosinüs mesafe operatörü anlamına gelir. 
+> <#> Dot product mesafe operatörü anlamına gelir.
+
+HSNW hızlı vektör aramaları için kullanılabilir.

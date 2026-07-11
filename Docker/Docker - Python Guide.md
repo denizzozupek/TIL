@@ -6,44 +6,44 @@ Başta Docker'i indirmiş ve bir Git clienti kullanıyor olmalıyız. Bu adımla
 
 ## Dockerfile
 
-#### 1) FROM
+#### ==1) FROM==
 
-Her Dockerfile `FROM` ile başlar. `FROM` bir base image (çalışma ortamını) belirtir; her zaman doğrudan "işletim sistemi" demek doğru olmayabilir (ör. `python:3.12-slim` bir Python çalışma zamanı imajıdır).
+Her Dockerfile ilk olarak FROM ile başlar. FROM işletim sistemini ve çalıştırılacağı dili söyler.
 
 #### ==2) WORKDIR==
 
 Çalışma alanını belirler. 
 
-#### 3) COPY vs ADD
+#### ==3)COPY==
 
-`COPY` yerel dosyaları imaj içine kopyalamak için kullanılır. `ADD` ise ekstra özelliklere sahiptir (ör. URL'den indirme veya arşivleri otomatik çıkarma) — çoğu durumda `COPY` daha öngörülebilir ve tercih edilir.
+Yerel cihazımızdaki dosyaları Docker container'inin içine kopyalamak için kullanılır.
 
-Kullanım örneği: `COPY . /app` (mevcut dizini konteynerde `/app`'e kopyala)
+**Kullanım:** Genellikle `COPY . /app` (mevcut dizindeki her şeyi konteynerdeki `/app` klasörüne kopyala) şeklinde kullanılır.
 
-#### 4) ENTRYPOINT ve CMD
+#### ==4) CMD==
 
-`CMD`: Varsayılan komut/parametreleri belirtir; `docker run` ile üzerine yazılabilir.
-
-`ENTRYPOINT`: İmajın her zaman çalıştıracağı komutu kilitler; `CMD` ile birlikte kullanıldığında `CMD` argümanları `ENTRYPOINT`'ın sonuna eklenir.
-
-Örnek: `ENTRYPOINT ["/entrypoint.sh"]` ve `CMD ["uvicorn", "app.main:app"]` kombinasyonu, entrypoint script'in çalışmasını sağlar ve CMD ile varsayılan argümanlar verilir.
-
-#### 5) RUN
-
-İmaj oluşturulurken çalıştırılacak komutlar için kullanılır. Örnek:
-
-```
-RUN pip install --no-cache-dir -r requirements.txt
-```
-
-Not: Katman (layer) sayısını azaltmak için mümkün olduğunca tek RUN içinde birleştirme yapılabilir.
+Dockerfile'daki `CMD` komutu, bir Docker konteyneri başlatıldığında çalıştırılacak **varsayılan komutu veya parametreleri** tanımlar. İmaj çalıştırılırken (docker run) ekstra bir komut verilmezse `CMD` devreye girer, ancak çalışma zamanında kolayca ezilebilir (geçersiz kılınabilir). 
 
 
-#### Docker Compose
+==**CMD Komutunun Temel Özellikleri:**==
 
-Servis bağımlılıklarını, ağları ve volümleri tek bir YAML dosyasında tanımlamanızı sağlar. Not: `docker compose` (v2) ve `docker-compose` (v1) komutları arasında küçük farklar olabilir; modern Docker sürümlerinde `docker compose` tercih edilir.
+- **Varsayılan İşlem:** Konteyner ayağa kalktığında otomatik olarak çalışmasını istediğiniz uygulamayı veya betiği belirtir.
+- **Ezilebilir Yapı:** `docker run` komutunun sonuna yeni bir komut eklenirse, Dockerfile'daki `CMD` komutu devre dışı kalır.
+- **Sınırlama:** Bir Dockerfile içinde yalnızca **bir adet** `CMD` bulunmalıdır. Birden fazla varsa, yalnızca en sonuncusu çalışır.
+- **Kullanım Formatı:** Genellikle JSON dizisi formatında (`CMD ["executable","param1"]`) kullanılır.
 
-`docker-compose.yml` temel yapı taşları: `services`, `volumes`, `networks`, `version` (isteğe bağlı).
+#### ==4) RUN==
+
+Docker imajı oluşturulurken komutlar çalıştırmak için işe yarar.
+
+ **Kullanımı**: Genellikle RUN pip install -r requirement.txt 
+
+
+#### ==Docker Compose== 
+
+Tek tek terminal komutları yazmak yerine, tüm sistemin mimarisini tek bir YAML dosyasına yazarak, tek komutla (`docker-compose up`) hem Python uygulamanı hem de PostgreSQL veritabanını aynı anda, birbirine bağlı şekilde ayağa kaldırmanı sağlayan orkestrasyon aracı.
+
+İşin temelinde `docker-compose.yml` dosyası yatar. Bu dosya üç ana yapı taşından oluşur: **Services**, **Volumes** ve **Networks**. (+ Version)
 
 
 ```yaml
@@ -76,14 +76,18 @@ volumes:
 ```
 
 
-Temel komutlar:
+==Temel Yönetim Komutları==
 
-- `docker compose up` : Tüm servisleri oluşturur ve başlatır. `-d` arka plan, `--build` imajları yeniden derler.
-- `docker compose down` : Servisleri, ağları ve bağlantılı kaynakları durdurur ve isteğe bağlı olarak kaldırır.
-- `docker compose start/stop` : Oluşturulmuş servisleri başlatır/durdurur.
-- `docker compose restart` : Servisleri yeniden başlatır.
+- **docker compose up: Yapılandırma dosyasındaki tüm servisleri oluşturur ve başlatır.
 
-Ek not: Projede gereksiz dosyaların konteyner içine kopyalanmasını önlemek için `.dockerignore` dosyası oluşturun (örn. `venv/`, `.git/`, `__pycache__/`).
+    - `-d`: Servisleri arka planda (detached mod) çalıştırır.
+    - `--build`: Başlatmadan önce imajları yeniden derler.
+
+- **docker compose down: Tüm konteynerleri, ağları ve (isteğe bağlı olarak) disk birimlerini durdurur ve tamamen kaldırır.
+
+- **docker compose start/ stop**: Halihazırda oluşturulmuş olan servisleri başlatır veya durdurur (konteynerleri silmez).
+
+- **docker compose restart**: Tüm servisleri veya belirli bir servisi yeniden başlatır. 
 
 # ==Taslaklar==
 
@@ -107,6 +111,6 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Docker Entrypoint.sh
 
-Konteyner başlatıldığında ilk çalışan betiktir. Sorumlulukların ayrılması (separation of concerns) açısından önemlidir.
+Konteyner başlatıldığında ilk çalışan komut dosyası. Sorumlulukların ayrılması "Seperation of Concerns" konusu açısından çok önemlidir.
 
-Örnek kullanım: veritabanı hazır olana kadar bekleme, ortam değişkenlerini ayarlama, migrasyon çalıştırma vb. işleri burada yapabilirsiniz.
+Konteynerin ayağa kalkması, veritabanı bağlantılarının kurulması, ortam değişkenlerinin ayarlanması veya ana uygulamanın başlatılması gibi hazırlık işlemlerini yönetir.

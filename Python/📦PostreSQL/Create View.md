@@ -7,8 +7,8 @@ JOIN read_log  ON books.id = read_log.book_id
 WHERE read_log.read_year = 2025;
 ```
 
-Bu şekilde sık kullanılan sorguları bir `VIEW` içine alıp, daha sonra basit `SELECT * FROM kitap_gecmisim_2025` ile sorgulayabilirsiniz.
+Bu şekilde tablolardan istediğimiz verileri kaydedip onları görüntülemek istediğimiz zaman çağırabiliriz:
 
-```sql
-SELECT * FROM kitap_gecmisim_2025;
+```SQL
+SELECT * FROM kitap_gecmisim_2025
 ```

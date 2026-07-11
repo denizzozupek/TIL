@@ -1,14 +1,15 @@
-# postgresql #database
+#postresql #database 
+**Verileri Toplama**
 
-## Verileri toplama
+```SQL
 
-```sql
 SELECT SUM(sutun_adi) FROM tablo_adi;
 ```
 
-## Koşula göre veri sayma
+**Koşula göre veri sayma**
 
-```sql
+
+```SQL
 SELECT COUNT(*) FROM tablo_adi WHERE kosul;
 ```
 
@@ -31,11 +32,12 @@ SELECT setval(
 );
 ```
 
-
 ### Örnek (read_log tablosu için):
 
-```sql
-SELECT setval(pg_get_serial_sequence('read_log', 'id'), (SELECT COALESCE(MAX(id), 0) FROM read_log));
+
+```SQL
+
+SELECT setval(pg_get_serial_sequence('read_log', 'id'), (SELECT MAX(id) FROM read_log));
 ```
 
 ---

@@ -37,19 +37,18 @@ import logging
 # 1. İŞÇİ FONKSİYONU
 async def worker(queue: asyncio.Queue[str]) -> None:
     while True:
-        video_url = await queue.get()
         try:
+            video_url = await queue.get() # Kuyruktan iş bekle
             # ... asenkron işlemler (transkript, özet vb.) ...
-            pass
+            
         except asyncio.CancelledError:
             logger.info("Sunucu kapanıyor, işçi paydos etti.")
             raise
         except Exception as e:
             logger.error(f"Hata: {e}")
-            # Hata olsa da sıradaki işe geç
+            continue # Hata olsa da diğer işe geç
         finally:
-            # task_done() sadece queue.get() ile alınmış bir iş için çağrılmalı
-            queue.task_done()
+            queue.task_done() # İşin bittiğini kuyruğa bildir
 
 # 2. YAŞAM DÖNGÜSÜ (LIFESPAN)
 @asynccontextmanager

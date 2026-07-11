@@ -1,48 +1,53 @@
-# pydantic # fastapi # api # database
+#pydantic #fastapi #api #database 
 
-## UX ve DB çatışmasını çözmek
+## **UX ve DB Çatışmasını Çözmek (Abstraction):**
 
-Veritabanı modelleri (`models`) ile API'den gelen Pydantic şemaları (`schemas`) birebir aynı olmak zorunda değildir. Örneğin API'den `read_month` ve `read_year` alıp arka planda `read_date = date(read_year, read_month, 1)` şeklinde DB'ye kaydetmek UX açısından daha kolay olabilir.
+Veritabanındaki sütunlarla (models), API'den gelen JSON (schemas) birebir aynı olmak zorunda değil. Kullanıcının hayatını kolaylaştırmak için API'den sadece `read_month` ve `read_year` (5 ve 2025) alıp, arka planda bunu Python ile birleştirerek PostgreSQL'in sevdiği `Date` objesine (`2025-05-01`) çevirerek kaydedebilirim. Bu, UX'i basitleştirirken veritabanının analitik gücünü korur.
 
-Örnek akış:
+Örnek:
 
 - API → `read_month=5`, `read_year=2025`
-- DB  → `read_date=2025-05-01`
+- DB → `read_date=2025-05-01`
 
-Bu dönüşüm service layer içinde yapılmalıdır; schema değil, iş mantığı bu dönüşümü gerçekleştirmeli.
+ Bu dönüşüm:
 
-## Dinamik sınırlar ve doğrulamalar
+- UX’i basitleştirir
+- DB’de filtreleme / analiz gücünü korur
 
-`Field(...)` içindeki `...` değeri alanı zorunlu yapar. Statik sabitler yerine dinamik sınırlar tercih edin (ör. `le=date.today().year`) fakat import-time değerlendirme farkına dikkat edin — runtime validator genelde daha güvenlidir.
+Bu katman genelde:  
+**service layer** içinde yapılmalı (schema değil)
+## **Dinamik Sınırlar:
 
-## Opsiyonel alanlar ve tip hataları
+** `Field(...)` içindeki üç nokta o verinin zorunlu olduğunu belirtir. Sınır çizerken kodun birkaç yıl sonra eskimemesi (technical debt yaratmaması) için statik rakamlar yerine `le=date.today().year` gibi dinamik fonksiyonlar kullanmak daha güvenli.
 
-`read_year: int | None = Field(ge=1900)` gibi bir tanım `None` geldiğinde karşılaştırma hatası üretebilir. Bu durumda ya `Optional[int]` için custom validator yazın, ya da `default=None` bırakıp validator ile koşulu kontrol edin.
+## **Sinsi Tip Hatası (Type Error):** 
 
-## Get-or-Create mantığı
+Bir değişkene `int | None` (opsiyonel) deyip aynı zamanda `ge=1900` gibi bir matematiksel koşul eklersem; API'ye `null` geldiğinde sistem `None >= 1900` kıyaslaması yapmaya çalışıp patlar (500 Internal Server Error). Matematiksel büyüklük sınırı olan şeyler opsiyonel olabilir ama oluyorsa da field validator ile korunmalı. 
 
-Birden fazla API çağrısı yerine tek bir geniş JSON alıp sunucu tarafında gerekli varlıkları (ör. kitap) bulup veya yaratmak genelde daha pratiktir. Bu işlemleri transaction içinde, atomic olarak yapmak önemlidir.
+## **Get-or-Create Mantığı:** 
+Kullanıcıya önce kitap ekletip sonra okuma kaydı ekletmek (iki ayrı API isteği atmak) kötü bir tasarımdır. API tek bir geniş JSON almalı (`BookAndLogCreate`), arka plandaki iş mantığı kitabı veritabanında arayıp bulmalı (veya yaratmalı) ve ID'leri kendi kendine eşleştirmelidir.
 
 ```python
 from pydantic import BaseModel, Field
 from datetime import date
 
 class BookAndLogCreate(BaseModel):
-	title: str
-	author: str
-	genre: str
-	page_count: int = Field(gt=0)
 
-	rating: int = Field(ge=1, le=10)
-	read_month: int = Field(ge=1, le=12)
-	read_year: int | None = Field(default=None)
+    title: str
+    author: str
+    genre: str
+    page_count: int = Field(gt=0)
 
-	# read_year doğrulaması için validator kullanılabilir
+    rating: int = Field(ge=1, le=10)
+    read_month: int = Field(ge=1, le=12)
+    read_year: int | None = Field(ge=1900, le=date.today().year)
 ```
 
-## `model_config = {"from_attributes": True}` (sürüm farkı)
 
-- Pydantic v1: ORM objelerini okumak için `class Config: orm_mode = True` kullanılır.
-- Pydantic v2: `model_config = {"from_attributes": True}` veya ilgili ayarlar kullanılır.
+### model_config = {"from_attributes": True}
 
-Eğer direkt ORM nesnesi (SQLAlchemy objesi) veriliyorsa ilgili `orm_mode`/`from_attributes` ayarlarını açmak gerekir.
+>[!important] Veritabanı Tablosunun kendisini yolluyorsak kullanmak şarttır.
+
+Pydantic gelen veriyi JSON/sözlük formatında görmezse hata verir. Örneğin eğer veri obje ise from_attributes=True bunları okumaya yarar. 
+
+İç içe verilerde özellikle object de geldiği için bu ayar sadece ana objeyi değil içindeki objeyi tanımayı ve onu da otomatik olarak JSON şemasına dönüştürmeyi sağlar.

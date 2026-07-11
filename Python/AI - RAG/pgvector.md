@@ -1,4 +1,11 @@
 **Tarih:** 14.05.2026
-**Etiketler:** #pgvector
+**Etiketler:** #pgvector 
 
-Kısa not: Bu dosya `pgvector` kullanımına dair notları tutar. Detaylı SQL örnekleri için `Python/📦PostreSQL/pgvector.md` dosyasına bakabilirsiniz.
+<=>: cosine similarity
+<->: euclidean distance (L2)
+
+>[!info] Cosine similarity is calculated as 1 – cosine_distance
+
+```python
+SELECT 1 - (embedding <=> '[3,1,2]') AS cosine_similarity FROM items;
+```

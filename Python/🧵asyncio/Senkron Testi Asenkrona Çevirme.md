@@ -3,35 +3,22 @@
 **Etiketler:** #asyncio #python #pytest #testing #mocking #AsyncVideoSummarizerProject
 
 > [!info] Temel Kural
-> [!info] Temel Kural
-> Asenkron testlerde `async def` ile tanımlanan test fonksiyonlarına `@pytest.mark.asyncio` ekleyin veya `pytest-asyncio` plugin'i kullanın.
+>1. async def ile asenkron yapılan fonksiyonun üstüne hata vermemesi için @pytest.mark.asyncio eklenir. 
 
-> [!tip] Asenkron nesneleri taklit etmek (mocking)
-> Standart `MagicMock` senkron fonksiyonları taklit eder. Asenkron fonksiyonlar için `unittest.mock.AsyncMock` kullanın.
+>[!tip] Asenkron Nesneleri Taklit Etmek (Mocking) > 
+Standart `MagicMock` sadece senkron fonksiyonları taklit eder. Eğer asenkron çalışan (başında `await` ile çağrılan) bir nesneyi veya fonksiyonu test ortamında taklit (mock) etmek istiyorsak, `unittest.mock` kütüphanesinden **`AsyncMock()`** modülünü kullanmalıyız.
 
-> [!warning] Await kullanımı
-> Asenkron bir fonksiyonu test içinde çağırıyorsanız, sonucu `assert` etmeden önce mutlaka `await` ile bekleyin. Aksi halde coroutine objesi elde edersiniz.
-
-### Örnek kullanım:
-
+> [!warning] Await Kullanımı > Testin içinde asenkron bir fonksiyonu çağırıyorsak, sonucunu `assert` (doğrulama) ile test etmeden önce o fonksiyonu mutlaka `await` ile bekleyip gerçek değerini bir değişkene çıkarmalıyız. (Aksi halde elimizde gerçek veri değil, bir "coroutine/bekleme bileti" olur ve test yanlışlıkla başarısız olur.)
+### 💻 Örnek Kullanım:
 ```python
-import pytest
+    @pytest.mark.asyncio
 
-@pytest.mark.asyncio
-async def test_success():
-	transcript = "Bu bir test video transkriptidir."
-	summary = await youtube_text_summarizer(transcript)
-	assert summary == "Özetlenmiş metin"
-```
+    async def test_success(self , mock_env):
 
-Mock örneği:
+        """Checks if we get a summary back when everything goes right."""
 
-```python
-from unittest.mock import AsyncMock
+        transcript = "Bu bir test video transkriptidir. İçeriği özetlenecektir."
 
-async def test_with_mock(monkeypatch):
-	mock_summarizer = AsyncMock(return_value="Özetlenmiş metin")
-	monkeypatch.setattr("app.summarizer.youtube_text_summarizer", mock_summarizer)
-	result = await mock_summarizer("dummy")
-	assert result == "Özetlenmiş metin"
-```
+        summary = await youtube_text_summarizer(transcript)
+
+        assert summary == "Özetlenmiş metin"

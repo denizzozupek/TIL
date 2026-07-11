@@ -29,13 +29,7 @@ from my_app.models import Base
 # 1. Her açılışta bir kere engine çalıştırır.
 @pytest.fixture(scope="session")
 def engine():
-    # TestClient ile aynı process/thread içinde kullanmak için aşağıdaki ayarlar gerekebilir
-    from sqlalchemy.pool import StaticPool
-    return create_engine(
-        "sqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    return create_engine("sqlite:///:memory:")
 
 # 2. Her açılışta tabloları kurar, yield ile beklemeye alır, bitince tabloları siler.
 @pytest.fixture(scope="session")
@@ -78,5 +72,3 @@ test koşusu başlar
             └── test biter → rollback
     └── tablolar silinir
 test koşusu biter
-
-Not: `TestClient` ile entegrasyon testlerinde `check_same_thread=False` ve `StaticPool` kullanmak, in-memory SQLite bağlantısının farklı thread'lerde de kullanılmasına olanak verir.

@@ -1,62 +1,41 @@
 # Alembic Nedir?
 
->[!info] Alembic, Python ekosisteminde kullanılan popüler bir migration aracıdır. Genelde SQLAlchemy ORM ile birlikte kullanılır.
+>[!info] Alembic, Python ekosisteminde kullanılan en popüler migration aracıdır. Genelde SQAlchemy ORM ile birlikte çalışır.
 
 Özellikleri:
 
-- Migration dosyalarını otomatik oluşturma (autogenerate) imkanı sunar.
-- SQL yerine Python kodu yazarak şema değişikliklerini yönetmeyi sağlar.
-- `upgrade` ve `downgrade` komutlarıyla ileri/geri hareket mümkündür.
+- Migration dosyalarını otomatik oluşturur.
+- SQL yerine Python kodu yazarak şema değişikliklerini yönetirsin.
+- upgrade ve downgrade komutlarıyla ileri/geri hareket mümkündür.
 
 
 ## Kullanımı
 
-1) Paket kurulumu:
-
+1) İlk olarak paket indirilir ve kurulur. 
 	pip install alembic
 
-2) Projeye Alembic ekleme:
-
+2) Ardından alembic başlatılır
 	alembic init alembic
 
-3) `env.py` içinde `target_metadata` ayarı:
+3) alembic dosyasında açılan env.py dosyasına database import edilir ardından target_metadata = Base.metadata olarak değiştirilir
 
-Örnek (projenizdeki `Base` tanımına göre uyarlayın):
+4) alembic.ini dosyasının içindeki sqlalchemy.orm urlsi bizim kendi database urlmiz ile değiştirilir.
 
-```python
-from myapp.models import Base  # veya proje yolunuza göre
+5)  **Migration Oluşturma**
 
-target_metadata = Base.metadata
-```
-
-4) `alembic.ini` içinde veritabanı URL'si:
-
-`alembic.ini` dosyasında `sqlalchemy.url` anahtarını kendi veritabanı bağlantı URL'iniz ile değiştirin. Örnek:
-
-```
-sqlalchemy.url = postgresql+psycopg2://user:password@localhost:5432/mydatabase
-```
-
-5) **Migration oluşturma**:
-
-Aşağıdaki komut, modellerinizdeki değişiklikleri otomatik algılayıp yeni bir revision dosyası oluşturur:
+Aşağıdaki komutla o an kodlarla oluşturulan veri tabanı şema bilgisi migration olarak kaydedilir.
 
 	alembic revision --autogenerate -m "create users table"
 
-Ardından migration'ı uygulamak için:
+6) **Geri Alma(Downgrade)**
 
-	alembic upgrade head
-
-6) **Geri alma (downgrade)**
-
-Son yaptığınız migration'ı bir adım geri almak isterseniz:
+Son yaptığın değişiklik eğer yanlışsa ve geri almak istiyorsan:
 
 	alembic downgrade -1
 
-### `head`, `base` ve `-1` nedir?
+### head, base ve -1 nedir?
 
-- **head:** En son migration revision'ını temsil eder. `alembic upgrade head` komutu tüm eksik migration'ları sırasıyla uygular.
-- **base:** Migration uygulanmamış (boş) durumdur. `alembic downgrade base` tüm migration'ları geri alır.
-- **-1 / -2 / +N:** Sayısal adımlar, revision geçmişinde geriye veya ileriye adım sayısını belirtir. `-1` bir önceki adıma geri döner.
+- **head:** En son migration dosyasını temsil eder. alembic upgrade head dendiğinde tüm migrationları sırasıyla çalıştırır ve en güncele(head) ulaşır.
+- **base:** En başlangıç noktasıdır. Yani migration uygulanmamış halidir.
 
-Not: Daha güvenli downgrade/upgrade işlemleri için revision id'lerini kullanmak (`alembic downgrade <rev_id>`) önerilir.
+alembic downgrade base

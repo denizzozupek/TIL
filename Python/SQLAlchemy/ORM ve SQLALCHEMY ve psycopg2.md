@@ -48,18 +48,13 @@ class ReadLog(Base):
     book = relationship('Book', back_populates='logs')
 
 # SQLAlchemy'ye bağlanmak istediğimiz veritabanının türünü, kullanıcı adını, şifresini, sunucu adresini ve veritabanı adını belirtir. Bu örnekte, PostgreSQL veritabanına bağlanmak için gerekli bilgileri içerir.
-# Dikkat: Gerçek bağlantı bilgilerini kod içinde saklamayın; ortam değişkenleri veya konfigürasyon kullanın.
-engine = create_engine('postgresql+psycopg2://user:password@localhost:5432/dbname')
+engine = create_engine('postgresql+psycopg2://postgres:dnzking60@localhost:5432/postgres')
 Base.metadata.create_all(engine)
 
-# sessionmaker, veritabanı oturumları (Session) oluşturmak için kullanılır.
-# Örnek konfigürasyon:
-from sqlalchemy.orm import sessionmaker
-SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
+# sessionmaker, SQLAlchemy'de veritabanı oturumları oluşturmak için kullanılan bir sınıftır. sessionmaker, bir veritabanı bağlantısı (engine) ile yapılandırılır ve daha sonra bu yapılandırmayı kullanarak yeni oturumlar (sessions) oluşturabilir. Bu oturumlar, veritabanı işlemlerini gerçekleştirmek için kullanılır. sessionmaker'ı kullanarak oluşturulan oturumlar, veritabanına sorgular göndermek, veri eklemek, güncellemek veya silmek gibi işlemleri yapmanıza olanak tanır.
 
-# Kullanım:
-with SessionLocal() as session:
-    ...
+session = sessionmaker()
+session.configure(bind=engine)
 ```
 
 # Psycopg2 
@@ -87,11 +82,13 @@ Eğer sınıfa "__ repr__" methodu eklersek, from sqlalchemy import select modul
 
 SQLAlchemy 2.0 mimarisinde sorgular doğrudan çalıştırılmaz, önce inşa edilir. `select(Book)` kodu veritabanına gitmez; sadece Python hafızasında saf bir SQL metni (Örn: `SELECT * FROM books`) oluşturur. Bu bir taslaktır. Bu taslağın içine `where()`, `order_by()` gibi filtreler eklenerek sorgu zenginleştirilir.
 
-**Veriyi çekmek: `execute()` vs `scalar()` vs `scalars()`**
+**Veriyi Çekmek: `execute()` vs `scalar()` vs `scalars()`** Oluşturulan `select()` taslağını veritabanına göndermek ve dönen cevabı Python'a almak için oturumun (session) çalıştırıcı fonksiyonları kullanılır.
 
-- `session.execute(...)`: Ham (raw) veritabanı sonuçlarını döndürür (RowProxy benzeri objeler).
-- `session.scalars(...)`: ORM nesnelerini (ör. `Book`) döndüren, kullanımı rahat bir API sağlar. Örnek: `session.scalars(select(Book)).all()`
-- `session.scalar(...)`: Tek bir skaler değer veya tek nesne almak için kullanılır (ilk satırın ilk sütunu / tek nesne).
+- **`s.execute(...)`:** Ham (raw) veritabanı satırları döndürür. Okuması ve yönetmesi zordur.
+    
+- **`s.scalars(...)`:** Gelen ham satırları alır, onları senin belirlediğin nesnelere (örneğin `Book` sınıfına) dönüştürür ve bir nesne listesi (iterable) olarak sana sunar. Birden fazla sonuç bekliyorsan (örneğin tüm kitaplar) `s.scalars(...).all()` kullanırsın.
+    
+- **`s.scalar(...)`:** "Bana gelen listenin sadece **ilk satırındaki ilk nesneyi** ver, gerisini çöpe at" demektir. Yalnızca tek bir kaydı (örneğin ID'si 1 olan kitap veya "Dune" isimli spesifik bir kitap) bulmak istediğimizde nokta atışı yapmak için kullanılır.
 	
 - **where:** Sorguya arama filtreleri eklememizi sağlar
   
@@ -210,9 +207,10 @@ Bütün kitapların ortalamasını alıp ortalamadan büyük olan kitapları ver
 ```Python
 with SessionLocal() as s:
     query = select(func.avg(Book.page_count)).scalar_subquery()
-result = session.execute(select(Book).where(Book.page_count > query)).scalars().all()
-for book in result:
-    print(f"{book.title} - {book.page_count} pages")
+    result = s.execute(select(Book).where(Book.page_count > query)).scalars().all()
+    
+    for book in result:
+        print(f"{book.title} - {book.page_count} pages")
 ```
 
 

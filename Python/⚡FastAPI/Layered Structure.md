@@ -1,35 +1,31 @@
 
-> Explicit is better than implicit.
+>  Explicit is better than implicit. 
 
-Sorumlulukların ayrılması prensibine göre, proje büyüdükçe kontrolün azalmasını önlemek için katmanlı (layered) mimari kullanılır.
+Sorumlulukların ayrılması prensibine göre, dosya büyüdükçe kontrolün azalmasını önlemek için katmanlı mimari kullanılır.
 
 # FastAPI + SQLAlchemy Proje Yapısı
 
-```text
-READING_LOGS/                  # Projenin kök dizini
+```python
+READING_LOGS/                  # Projenin Kök Dizini (Root Directory)
 │
-├── app/                       # Çekirdek uygulama
-│   ├── __init__.py            # 'app' klasörünü bir paket yapar
-│   ├── main.py                # HTTP isteklerini alır, router'ları ve bağımlılık enjeksiyonunu başlatır
-│   ├── database.py            # Veritabanı engine ve session bağımlılıkları
-│   ├── models.py              # SQLAlchemy modelleri (DB tabloları)
-│   ├── schemas.py             # Pydantic şemaları (DTO / API input-output)
-│   └── crud.py                # Veritabanı işlemleri / repository fonksiyonları
+├── app/                       # Core
+│   ├── __init__.py            # Python'a "app" klasörünün bir paket olduğunu söyler.
+│   ├── main.py                # Recevies HTTP requests, hands them over worker(crud.py)
+│   ├── database.py            # Database engine and session.
+│   ├── models.py              # Database Tables.
+│   ├── schemas.py             # View Model - Data Transfer Object (pydantic etc.)
+│   └── crud.py                # SQL queries are written here. Seperates SQL/ORM complexity from main.py.
 │
-├── alembic/                   # Database migration dosyaları
-├── alembic.ini                # Alembic yapılandırması
+├── alembic/                   # Database Migrations
+├── alembic.ini                # Alembic conf.
 │
-├── venv/                      # Sanal ortam (gitignore'da tutulur)
+├── venv/                      # Virtual Environment
 │
-├── .env                       # Ortam değişkenleri (gizli bilgileri burada saklama, .gitignore)
-└── .gitignore
+├── .env                       # Passwords - API key etc. for .gitignore
+└── .gitignore                 
 ```
 
-Kısa açıklamalar:
-
-- `models.py`: Veri katmanı — veritabanı tabloları tanımlanır.
-- `schemas.py`: API ve kullanıcı arayüzü için veri aktarımlarını tanımlar (Pydantic).
-- `crud.py`: Veri erişim katmanı (repository) — SQL/ORM mantığını izole eder.
-- `main.py`: Router/Controller'lar; HTTP isteklerini uygun servislere yönlendirir.
-
-Not: Veritabanı session'ını bağımlılık (`dependency`) olarak tanımlayıp request-scoped kullanmak, transaction yönetimini ve test edilebilirliği artırır.
+models.py : Data Layer
+schemas.py : Data Transfer Object
+crud.py : Data Access Layer 
+main.py : Controllers / Routers
