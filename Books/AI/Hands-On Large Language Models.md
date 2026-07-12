@@ -31,4 +31,27 @@ Step 2 is **Fine-Tuning (Post-Training)** is adapt the base model to exhibit des
 
 **Tokenization (Token Optimization Problem):** The process which decide the rules for splitting string into tokens. Most efficient one is Subword Tokenization.
 
-**Token Embeddings:** They are the numeric representation space utilized to capture the meanings and patterns in language.
+**Token Embeddings:** They are the numeric representation space utilized to capture the meanings and patterns in language. (N x D)
+
+**Contextual Embeddings:** Token's (or word's) coordinates shift based on the surrounding words in that specific sentence. 
+
+**Text Embeddings:** A single vector represent the semantic meaning of entire sentence paragraph or document. (1 x D)
+
+
+# Chapter 3. Looking Inside Large Language Models
+
+**Self Attention Mechanism:** It compares every words to all other words in the same sentence at the same time. This helps the model figure out true meaning of a word based on its context. To do this, the transformer turns every word into three new parts:
+
+1. **Query (Q):** What the word is "looking for" or asking about.
+2. **Key (K):** What the word "contains" or offers to others.
+3. **Value (V):** The actual meaning or information of the word.
+
+ **Multi-Head Self-Attention:** Multi-Head Attention extends the self attention mechanism by using multiple attention heads in parallel. This mean transformer repeat self attention mechanism multiple times in parallel. Every head lets the model look at different things at the same time. [More Source For This Topic](https://www.geeksforgeeks.org/nlp/self-attention-in-nlp/)
+
+**KV Cache (Key-Value Cache):** KV cache is optimization in LLMs used to generate faster. It stores previously computed attentions for text. But when material gets longer, it RAM usage run high. 
+
+**Greedy Decoding:** At each step, the model guesses all possible next words, gives each a mathematical probability, and picks the single most likely word
+
+**Why we chunking materials?** 
+
+Because of **"Parallel Token Processing"**, and **Multi-Head Self-Attention** (explanation in above) we multiply all words by each other. Hardware needs more RAM when text, material, document when it gets longer, because RAM usage increasing $N^2$ geometrically. This is the answer of why we can't give 10000 page document into the model at once.
