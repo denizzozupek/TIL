@@ -92,6 +92,6 @@ Ultimately, session-level evaluation helps you catch problems that don’t show 
 
 # Evaluation Metrics : 
 
-![[evaluation_metrics .ipynb]]
+![[evaluation_metrics.ipynb]]
 
 
