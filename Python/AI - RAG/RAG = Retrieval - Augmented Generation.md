@@ -1,5 +1,7 @@
 RAG stands for Retrieval-Augmented Generation. It’s a way to build LLM applications that can answer questions using external data – like product docs, support content, or internal knowledge bases – instead of relying only on what the model saw during training.
 
+RAG, LLM'lerin dışarıdan verilen verilerden bilgi çekerek daha doğru ve güvenilir yanıtlar üretmesini sağlayan bir tekniktir. Bu sayede güncelliği yitirilmiş, halüsinasyon ihtimali yüksek bilgileri fine-tuning gibi büyük ölçekli bir işlem yerine direkt modele vererek halüsinasyon ihtimali azaltılır.
+
 RAG works in two steps:
 
 - First, the system retrieves relevant information – that’s the “R.”
