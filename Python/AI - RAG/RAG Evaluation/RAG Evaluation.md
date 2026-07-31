@@ -90,8 +90,8 @@ Ultimately, session-level evaluation helps you catch problems that don’t show 
 
 **Avoid perfection traps.** Don’t aim for “the best possible evaluator.” Aim for something useful. You can always iterate on your test cases or your LLM judge prompts. What matters most is having a working loop where you can spot issues, try fixes, and know if things got better.
 
-# Evaluation Metrics : 
+# Evaluation Metrics
 
-![[evaluation_metrics.ipynb]]
+- [Evaluation notebook](evaluation_metrics.ipynb)
 
 
