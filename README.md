@@ -9,6 +9,7 @@
 - [🤖 AI Engineering](#-ai-engineering)
   - [Data Management](#data-management)
   - [RAG & Vector Search](#rag--vector-search)
+  - [LangChain Engine](#langchain-engine)
   - [RAG Evaluation](#rag-evaluation)
 - [🐍 Python & Backend Architecture](#-python--backend-architecture)
   - [FastAPI](#fastapi)
@@ -34,6 +35,10 @@
 * [Vector embedding](./AI%20Engineering/RAG/Vector%20embedding.md)
 * [pgvector](./AI%20Engineering/RAG/pgvector.md)
 * [RAG-Architectural Schema](./AI%20Engineering/RAG/RAG-Architectutre%20Schema.md)
+
+### LangChain Engine
+* [What is LangChain?](./AI%20Engineering/RAG/LangChain/What_is_LangChain.md)
+* [LangChain LCEL Engine](./AI%20Engineering/RAG/LangChain/LangChain%20LCEL(LC%20Expression%20Language).md)
 
 ### RAG Evaluation
 * [LLM-as-a-Judge](./AI%20Engineering/RAG/RAG%20Evaluation/LLM-as-a-Judge.md)
