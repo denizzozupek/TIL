@@ -179,7 +179,7 @@ Combines dense retrieval (Vector Embeddings for semantic matching) with sparse r
 
 Mathematically, the RRF score for a document $d \in D$ given rank positions $r_m(d)$ across retrieval methods $M$ is:
 
-$$\text{RRF\_Score}(d \in D) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
+$$ text{RRF\_Score}(d \in D) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
 
 
 ```Python
