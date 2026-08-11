@@ -10,7 +10,7 @@ source: https://github.com/aurelio-labs/langchain-course/blob/main/chapters/07-l
 - [1. LCEL RunnableLambda](#1-lcel-runnablelambda)
 - [2. RunnableParallel and RunnablePassthrough](#2-runnableparallel-and-runnablepassthrough)
   - [2.1. RunnablePassthrough.assign()](#21-runnablepassthroughassign)
-- [3. RunnableConfig & configurable_fields / configurable_alternatives](#3-runnableconfig--configurable_fields--configurable_alternatives)
+- [3. RunnableConfig & configurable\_fields / configurable\_alternatives](#3-runnableconfig--configurable_fields--configurable_alternatives)
 - [4. RunnableBranch & Dynamic Routing](#4-runnablebranch--dynamic-routing)
 - [5. RunnableWithFallbacks (Fault Tolerance & Error Handling)](#5-runnablewithfallbacks-fault-tolerance--error-handling)
 - [6. Streaming & Event Handling (astream_events)](#6-streaming--event-handling-astream_events)
@@ -42,9 +42,7 @@ $$\text{lcel\_chain} = \text{prompt} \mid \text{llm} \mid \text{output\_parser}$
 Mathematically, if we represent each component as a function:
 
 - $P(x)$: `prompt` (takes user input dictionary $x$, returns formatted prompt)
-
 - $L(p)$: `llm` (takes formatted prompt $p$, returns `BaseMessage`)
-
 - $O(m)$: `output_parser` (takes `BaseMessage` $m$, returns `str`)
 
 The entire chain represents the composite function $(O \circ L \circ P)(x)$:
@@ -131,7 +129,7 @@ chain = (
 ```
 
 _Output structure:_ `{"question": "Erdem nedir?", "chat_history": ..., "context": "..."}`
-## 3. RunnableConfig & configurable_fields / configurable_alternatives
+## 3. RunnableConfig & configurable\_fields / configurable\_alternatives
 
 Provides runtime flexibility by allowing parameters (e.g., `temperature`, `max_tokens`) or entire sub-components (e.g., swapping OpenAI for Claude) to be dynamically altered during the `.invoke()` call without modifying the chain architecture.
 
