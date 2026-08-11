@@ -49,7 +49,7 @@ Mathematically, if we represent each component as a function:
 
 The entire chain represents the composite function $(O \circ L \circ P)(x)$:
 
-$$\text{lcel\_chain}(x) = O\Big(L\big(P(x)\big)\Big)$$
+$$\text{lcel\_chain}(x) = O\left(L\left(P(x)\right)\right)$$
 
 ## 1. LCEL RunnableLambda
 
