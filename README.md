@@ -98,4 +98,4 @@
 * [Hands-On Large Language Models](./Books/AI/Hands-On%20Large%20Language%20Models.md)
 
 ---
-*Maintained by [Deniz Özüpek](https://github.com/denizzozupek)*
+*Maintained by [Deniz Eren Özüpek](https://github.com/denizzozupek)*
