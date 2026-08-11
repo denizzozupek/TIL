@@ -3,7 +3,7 @@ Date: 11.08.2026
 Tags: #RAG #LangChain #LLM #LCEL
 source: https://github.com/aurelio-labs/langchain-course/blob/main/chapters/07-lcel.ipynb
 
-----
+---
 # Table of Contents
 - [Traditional Chains vs LCEL](#traditional-chains-vs-lcel)
   - [How Does the Pipe Operator Work?](#how-does-the-pipe-operator-work)
@@ -25,14 +25,12 @@ LLMChain is a legacy RAG chain method.
 
 ```python
 lcel_chain = prompt | llm | output_parser
-
-```
+````
 
 We invoke this chain:
 
-```python
+```Python
 lcel_chain.invoke("retrieval augmented generation")
-
 ```
 
 ### How Does the Pipe Operator Work?
@@ -43,21 +41,21 @@ $$\text{lcel\_chain} = \text{prompt} \mid \text{llm} \mid \text{output\_parser}$
 
 Mathematically, if we represent each component as a function:
 
-* $P(x)$: `prompt` (takes user input dictionary $x$, returns formatted prompt)
-* $L(p)$: `llm` (takes formatted prompt $p$, returns `BaseMessage`)
-* $O(m)$: `output_parser` (takes `BaseMessage` $m$, returns `str`)
+- $P(x)$: `prompt` (takes user input dictionary $x$, returns formatted prompt)
+
+- $L(p)$: `llm` (takes formatted prompt $p$, returns `BaseMessage`)
+
+- $O(m)$: `output_parser` (takes `BaseMessage` $m$, returns `str`)
 
 The entire chain represents the composite function $(O \circ L \circ P)(x)$:
 
 $$\text{lcel\_chain}(x) = O\Big(L\big(P(x)\big)\Big)$$
 
----
-
 ## 1. LCEL RunnableLambda
 
 `RunnableLambda` converts a custom Python function $f$ into an LCEL-compatible `Runnable`, enabling arbitrary data transformations within the function composition pipeline $(f \circ g)(x)$.
 
-```python
+```Python
 from langchain_core.runnables import RunnableLambda
 
 def format_text(text: str) -> str:
@@ -66,17 +64,14 @@ def format_text(text: str) -> str:
 clean_text_runnable = RunnableLambda(format_text)
 
 chain = prompt | llm | StrOutputParser() | clean_text_runnable
-
 ```
-
----
-
 ## 2. RunnableParallel and RunnablePassthrough
 
-* **`RunnableParallel`**: Executes multiple runnables concurrently on the same input $x$ and returns a dictionary of results $H(x) = \{ \text{"k}_1\text{"}: f(x), \text{"k}_2\text{"}: g(x) \}$.
-* **`RunnablePassthrough`**: Acts as the mathematical identity function $I(x) = x$, passing the input data unchanged to the next component in the pipeline.
+- **`RunnableParallel`**: Executes multiple runnables concurrently on the same input $x$ and returns a dictionary of results $H(x) = \{ \text{"k}_1\text{"}: f(x), \text{"k}_2\text{"}: g(x) \}$.
 
-```python
+- **`RunnablePassthrough`**: Acts as the mathematical identity function $I(x) = x$, passing the input data unchanged to the next component in the pipeline.
+
+```Python
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
 # Explicitly defining a RunnableParallel:
@@ -93,26 +88,20 @@ chain = (
     | prompt
     | llm
 )
-
 ```
 
 Here, `RunnablePassthrough()` takes the string value from the incoming `{"question": "What is virtue?"}` input and passes it directly into the `"question"` key.
 
----
-
 ### 2.1. RunnablePassthrough.assign()
-
 Merges new key-value pairs into the existing input dictionary without overwriting or dropping prior state.
 
 Mathematically, given an input mapping $V$ and a key-value assignment $k = f(V)$, it computes the set union:
-
 $$\text{assign}(k = f)(V) = V \cup \{ k : f(V) \}$$
-
 **Key Benefit:** Unlike standard `RunnableParallel` (which rebuilds a dict from scratch), `.assign()` preserves all incoming fields (e.g., `chat_history`, `user_id`, `question`) and seamlessly injects computed fields (e.g., `context`).
 
 #### Standard RunnableParallel:
 
-```python
+```Python
 # Input: {"question": "Erdem nedir?", "chat_history": [...]}
 
 chain = (
@@ -123,12 +112,12 @@ chain = (
     | prompt
     | llm
 )
-
 ```
 
 #### RunnablePassthrough.assign():
 
-```python
+```Python
+
 # Input: {"question": "Erdem nedir?", "chat_history": [...]}
 
 chain = (
@@ -139,13 +128,9 @@ chain = (
     | qa_prompt # Receives question, chat_history, AND context automatically
     | llm
 )
-
 ```
 
-*Output structure:* `{"question": "Erdem nedir?", "chat_history": ..., "context": "..."}`
-
----
-
+_Output structure:_ `{"question": "Erdem nedir?", "chat_history": ..., "context": "..."}`
 ## 3. RunnableConfig & configurable_fields / configurable_alternatives
 
 Provides runtime flexibility by allowing parameters (e.g., `temperature`, `max_tokens`) or entire sub-components (e.g., swapping OpenAI for Claude) to be dynamically altered during the `.invoke()` call without modifying the chain architecture.
@@ -153,12 +138,11 @@ Provides runtime flexibility by allowing parameters (e.g., `temperature`, `max_t
 Mathematically, it parametrizes a function $f(x)$ with a configuration space $\theta \in C$, turning the composition into:
 
 $$\text{chain}(x; \theta) = \Big(O \circ L_{\theta} \circ P\Big)(x)$$
+- $x$: Input data
+- $\theta$: Runtime config
+- $L_{\theta}$: LLM function which specialized with theta parameter.
 
-* $x$: Input data
-* $\theta$: Runtime config
-* $L_{\theta}$: LLM function which specialized with theta parameter.
-
-```python
+```Python
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import ConfigurableField
 
@@ -174,22 +158,18 @@ response = chain.invoke(
     {"input": "Brainstorm project ideas"},
     config={"configurable": {"llm_temp": 0.8}}
 )
-
 ```
-
----
 
 ## 4. RunnableBranch & Dynamic Routing
 
 Dynamically routes the incoming input $x$ to different execution paths based on conditions or intent classification, operating as a mathematical piecewise function.
-
 Mathematically, given predicates $P_i(x)$ and target runnables $f_i(x)$:
 
-$$\text{chain}(x) = \begin{cases}  f_1(x), & P_1(x) = \text{True} \\  f_2(x), & P_2(x) = \text{True} \\  f_{\text{default}}(x), & \text{otherwise}  \end{cases}$$
+$$\text{chain}(x) = \begin{cases} f_1(x), & P_1(x) = \text{True} \\ f_2(x), & P_2(x) = \text{True} \\ f_{\text{default}}(x), & \text{otherwise} \end{cases}$$
 
 #### Classical RunnableBranch:
 
-```python
+```Python
 from langchain_core.runnables import RunnableBranch
 
 branch = RunnableBranch(
@@ -197,12 +177,11 @@ branch = RunnableBranch(
     (lambda x: "code" in x["topic"].lower(), code_chain),
     general_chain # Default fallback
 )
-
 ```
-
 #### Modern Router Function (Recommended):
 
-```python
+```Python
+
 from langchain_core.runnables import RunnableLambda
 
 # Custom routing function based on user intent/topic classification
@@ -215,18 +194,17 @@ def route_by_topic(input_dict: dict):
 # Complete execution pipeline: 
 # 1. Classifies the input intent -> 2. Dynamically routes to the corresponding chain
 chain = classifier_chain | RunnableLambda(route_by_topic)
-
 ```
 
-**Use Case for RAG:** Dynamic routing allows bypassing the Vector DB (`retriever`) for conversational queries (e.g., *"Hello"*, *"What did we talk about?"*) to save latency/cost, while routing document-specific questions to the full RAG pipeline.
+**Use Case for RAG:** Dynamic routing allows bypassing the Vector DB (`retriever`) for conversational queries (e.g., _"Hello"_, _"What did we talk about?"_) to save latency/cost, while routing document-specific questions to the full RAG pipeline.
 
 **Routing Decision Strategies:**
 
 1. **Rule-Based (Deterministic):** Uses explicit Python rules/keywords. Fast & zero cost, but rigid.
-2. **LLM Classifier (Intent-Based):** Uses a fast/light LLM call to classify user intent dynamically. Highly accurate, small latency trade-off.
-3. **Semantic Routing (Vector-Based):** Uses embedding similarity against predefined intent categories without invoking a full LLM. Fast and adaptable.
 
----
+2. **LLM Classifier (Intent-Based):** Uses a fast/light LLM call to classify user intent dynamically. Highly accurate, small latency trade-off.
+
+3. **Semantic Routing (Vector-Based):** Uses embedding similarity against predefined intent categories without invoking a full LLM. Fast and adaptable.
 
 ## 5. RunnableWithFallbacks (Fault Tolerance & Error Handling)
 
@@ -234,11 +212,13 @@ Wraps a primary `Runnable` $f$ with an ordered list of fallback `Runnables` $(g_
 
 Mathematically, it behaves as a guarded fallback composition:
 
-$$\text{chain}(x) = \begin{cases}  f(x), & \text{if } \neg \text{Error}(f(x)) \\  g_1(x), & \text{otherwise}  \end{cases}$$
+$$\text{chain}(x) = \begin{cases} f(x), & \text{if } \neg \text{Error}(f(x)) \\ g_1(x), & \text{otherwise} \end{cases}$$
 
 **Key Benefit:** Ensures high availability and production resilience at the LCEL layer without cluttering application code with manual `try-except` blocks.
 
-```python
+
+
+```Python
 from langchain_openai import ChatOpenAI
 from langchain_community.chat_models import ChatOllama
 
@@ -251,10 +231,7 @@ resilient_llm = primary_model.with_fallbacks([local_fallback])
 
 # Pipeline setup remains clean and declarative
 chain = prompt | resilient_llm | StrOutputParser()
-
 ```
-
----
 
 ## 6. Streaming & Event Handling (astream_events)
 
@@ -266,7 +243,7 @@ $$e_t = \Big( \text{type}_t, \; \text{component}_t, \; \Delta x_t \Big)$$
 
 **Key Benefit:** Enables real-time UI token streaming (`on_llm_stream`) while concurrently providing intermediate pipeline status updates (e.g., retrieving context, re-writing queries) to the user interface.
 
-```python
+```Python
 import asyncio
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -295,10 +272,7 @@ async def main():
 
 # Run async event stream loop
 # asyncio.run(main())
-
 ```
-
----
 
 ## 7. RunnableWithMessageHistory (Stateful Memory Integration)
 
@@ -310,7 +284,8 @@ $$\text{chain}(x; \text{session\_id}) = f\Big( x \cup S[\text{session\_id}] \Big
 
 **Key Benefit:** Keeps chains completely stateless while delegating session persistence out-of-band, avoiding manual state management inside the pipeline logic.
 
-```python
+
+```Python
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
@@ -353,10 +328,7 @@ response2 = conversational_chain.invoke(
     {"input": "What is my name?"},
     config={"configurable": {"session_id": "user_session_1"}}
 )
-
 ```
-
----
 
 ## 8. RunnableRetry (Exponential Backoff Retries)
 
@@ -364,7 +336,8 @@ Automatically retries a failing `Runnable` $f(x)$ with exponential backoff delay
 
 **Key Benefit:** Handles transient network failures and rate limits (e.g., HTTP 429/503) gracefully at the component level without making unnecessary cross-provider fallbacks.
 
-```python
+
+```Python
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables import RunnableRetry
 from langchain_core.output_parsers import StrOutputParser
@@ -385,15 +358,13 @@ explicit_retry = RunnableRetry(
 
 # Pipeline incorporating resilient retries
 chain = prompt | retryable_llm | StrOutputParser()
-
 ```
 
 **`RunnableRetry` vs. `RunnableWithFallbacks`:**
 
-* **`RunnableRetry`** handles **transient/temporary errors** (e.g., rate limits, network timeouts) by re-executing the **same** component with exponential backoff.
-* **`RunnableWithFallbacks`** handles **permanent/systemic failures** (e.g., total service outage, context length exceeded) by switching execution to an **alternative** component (e.g., fallback LLM provider).
+- **`RunnableRetry`** handles **transient/temporary errors** (e.g., rate limits, network timeouts) by re-executing the **same** component with exponential backoff.
+
+- **`RunnableWithFallbacks`** handles **permanent/systemic failures** (e.g., total service outage, context length exceeded) by switching execution to an **alternative** component (e.g., fallback LLM provider).
 
 **Best Practice Pattern:** Combine both by chaining retries inside a fallback wrapper:
-
 $$\text{final\_llm} = \text{primary\_llm.with\_retry}(\dots).\text{with\_fallbacks}([\text{backup\_llm}])$$
-
