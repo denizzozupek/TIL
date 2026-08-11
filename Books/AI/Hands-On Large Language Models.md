@@ -88,3 +88,43 @@ Because of **"Parallel Token Processing"**, and **Multi-Head Self-Attention** (e
 # Part II. Using Pretrained Language Models
 
 # Chapter 4. Text Classification
+
+Text classification is classification process in NLP that automatically assigns raw text to a category ,tag or class. Like ***f(text)=category.*** Some use cases are Sentiment Analysis, Category/Tag Detection, Spam Detection, Language Detection, etc.
+
+**Evaluation Metrics (Model Performance):**
+
+Accuracy alone is often insufficient for evaluating text classification models, especially with imbalanced datasets.
+
+- **Confusion Matrix:** Evaluates predictions using True Positives (TP), False Positives (FP), True Negatives (TN), and False Negatives (FN).
+    
+- **Precision:** Measures how many of the positively predicted instances were actually correct ($\frac{\text{TP}}{\text{TP} + \text{FP}}$).
+    
+- **Recall:** Measures how many of the actual positive instances were successfully captured ($\frac{\text{TP}}{\text{TP} + \text{FN}}$).
+    
+- **F1 Score:** The harmonic mean of Precision and Recall. It provides a balanced measurement for class imbalance.
+
+## Text Classification with Representation Models
+
+A task-specific model is a representation model, such as BERT, trained for a specific task like sentiment analysis.
+
+- ### Task-Specific Model
+	 Directly calling a model (Like CardiffNLP's Twitter-RoBERTa via Hugging Face pipeline("sentimental analysis")) to categorize input as 0 or 1. 
+
+- ### Embedding + Lightweight Classifier (More Practical)
+	Using a frozen embedding model, convert texts into 768-dimension vectors, then adding   
+	a classifier like Logistic Regression or Random Forest on this vectors . 
+
+### Without Labeled Data → Zero-Shot Classification
+
+If there is no labeled data, we can describe our labels based on what they should represent.
+
+Then using an embedding model, we convert both the document and the labels into vectors and calculate the cosine similarity between them .The label with the highest similarity (or smallest angle) is assigned as the prediction.
+
+
+## Text Classification with Generation Models
+
+Generation models don't knows what to do whit our data. We write prompt for classification and taking output data and parsing into labels. 
+
+**Data Contamination & Evaluation Risk:** Because of potential data contamination, we should approach $90\%+$ F1 scores from closed LLMs with suspicion, as they might be memorizing the data rather than generalizing. (For closed source LLMs)
+
+**Handling Rate Limits (API Constraints):** When making frequent API calls to closed-source LLMs (e.g., OpenAI), you may hit **Rate Limit errors (HTTP 429)**. To handling this we implement Exponential Backoff.
