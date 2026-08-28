@@ -1,8 +1,7 @@
 
-
 # Part I. Understanding Language Models
 
-# Chapter 1. An Introduction to Large Language Models
+## Chapter 1. An Introduction to Large Language Models
 
 **Language AI** = Subfield of AI that focuses on developing technologies capable of understanding, processing, and generating human language.
 
@@ -25,7 +24,7 @@ Step 1 is **Pretraining (Language Modeling)**; like grammar context, next token 
 Step 2 is **Fine-Tuning (Post-Training)** is adapt the base model to exhibit desired behavior or excel at a narrow task. Highly specific, high-quality dataset. Low compute compare to step 1. 
 
 
-# Chapter 2. Tokens and Embeddings
+## Chapter 2. Tokens and Embeddings
 
 **Token:** The basic unit of data that LLM read and generate. A token can be a whole word (mathematics), a word root (writing), a suffix (-cı, -lar), a single letter (x), or a punctuation mark (!). Every token corresponds a different integer. 
 
@@ -42,7 +41,7 @@ Step 2 is **Fine-Tuning (Post-Training)** is adapt the base model to exhibit des
 **Text Embeddings:** A single vector represent the semantic meaning of entire sentence paragraph or document. (1 x D)
 
 
-# Chapter 3. Looking Inside Large Language Models
+## Chapter 3. Looking Inside Large Language Models
 
 **Feedforward Neural Network (FNN):** While the Attention mechanism acts as the "detective" to determine which words look at each other to build context, the FNN acts as the model's memory and generalization center. After attention is calculated, the FNN uses the massive amount of knowledge the model memorized during pre-training to predict the next logical step or pattern. 
 
@@ -87,7 +86,7 @@ Because of **"Parallel Token Processing"**, and **Multi-Head Self-Attention** (e
 
 # Part II. Using Pretrained Language Models
 
-# Chapter 4. Text Classification
+## Chapter 4. Text Classification
 
 Text classification is classification process in NLP that automatically assigns raw text to a category ,tag or class. Like ***f(text)=category.*** Some use cases are Sentiment Analysis, Category/Tag Detection, Spam Detection, Language Detection, etc.
 
@@ -103,7 +102,7 @@ Accuracy alone is often insufficient for evaluating text classification models, 
     
 - **F1 Score:** The harmonic mean of Precision and Recall. It provides a balanced measurement for class imbalance.
 
-## Text Classification with Representation Models
+### Text Classification with Representation Models
 
 A task-specific model is a representation model, such as BERT, trained for a specific task like sentiment analysis.
 
@@ -114,17 +113,141 @@ A task-specific model is a representation model, such as BERT, trained for a spe
 	Using a frozen embedding model, convert texts into 768-dimension vectors, then adding   
 	a classifier like Logistic Regression or Random Forest on this vectors . 
 
-### Without Labeled Data → Zero-Shot Classification
+#### Without Labeled Data → Zero-Shot Classification
 
 If there is no labeled data, we can describe our labels based on what they should represent.
 
 Then using an embedding model, we convert both the document and the labels into vectors and calculate the cosine similarity between them .The label with the highest similarity (or smallest angle) is assigned as the prediction.
 
 
-## Text Classification with Generation Models
+### Text Classification with Generation Models
 
 Generation models don't knows what to do whit our data. We write prompt for classification and taking output data and parsing into labels. 
 
 **Data Contamination & Evaluation Risk:** Because of potential data contamination, we should approach $90\%+$ F1 scores from closed LLMs with suspicion, as they might be memorizing the data rather than generalizing. (For closed source LLMs)
 
 **Handling Rate Limits (API Constraints):** When making frequent API calls to closed-source LLMs (e.g., OpenAI), you may hit **Rate Limit errors (HTTP 429)**. To handling this we implement Exponential Backoff.
+
+## Chapter 5. Text Clustering and Topic Modeling
+
+
+#### 1. Text Clustering and Embeddings
+
+- **Main Purpose:** Grouping unstructured text data based on semantic similarity to explore and make sense of large datasets.
+
+- **Transformer Embeddings:** Unlike classic bag-of-words methods, Transformer-based embedding models convert the context and semantic meaning of text into vector space.
+
+- **Model Selection:** For clustering and RAG pipelines, pick fast models with high clustering and semantic similarity scores from leaderboards like MTEB (e.g., `gte-small`).
+
+#### 2. Curse of Dimensionality and Dimensionality Reduction
+
+- **The Problem (Curse of Dimensionality):** As vector dimensions grow (e.g., 384, 1536), the data space grows exponentially. Classic clustering algorithms struggle to calculate distances and relationships accurately in this space.
+
+- **The Solution (Dimensionality Reduction):** Compress high-dimensional data into a lower-dimensional space (e.g., 5–10 dimensions) while preserving the global semantic structure.
+
+**Key Algorithms:**
+
+ - **PCA:** A classic method that captures linear relationships.
+    
+    - **UMAP:** The modern standard method; better than PCA at preserving non-linear relationships and local/global structure.
+
+- **Distance Metric Note:** Euclidean distance fails in high-dimensional spaces, so Cosine Similarity is usually preferred during the UMAP step.
+
+#### 3. Clustering Models
+
+- **Centroid-Based (K-Means):** Forces you to define the number of clusters in advance and assigns every single data point to a cluster.
+
+- **Density-Based (HDBSCAN):**
+
+   - Automatically calculates the number of clusters based on dense areas without requiring a fixed cluster count.
+   
+    - **Outlier (Noise) Detection:** Identifies outlier data points that do not belong anywhere and marks them with a `-1` label instead of forcing them into a cluster. Ideal for cleaning noise in real-world data.
+
+#### 4. BERTopic and Modular Architecture (The Lego Principle)
+
+BERTopic is a modular framework that combines text clustering and topic modeling. It works in two main steps:
+
+1. **Clustering Step:** `SBERT (Embeddings) -> UMAP (Dimensionality Reduction) -> HDBSCAN (Clustering)`.
+
+2. **Topic Representation Step:** Extracting keywords and labels from the clustered text.
+
+- **Modularity:** Every component in this pipeline acts like a Lego block; you can swap HDBSCAN for K-Means or SBERT for OpenAI Embeddings.
+#### 5. Improving Topic Representation and Reranking (Crucial for RAG)
+
+Representing a cluster or search result using only word frequency is not enough. The optimization techniques used here are directly applied in RAG systems:
+
+- **c-TF-IDF (Class-based TF-IDF):** Calculates word frequency across an entire **cluster (class)** instead of individual documents. It weights how representative a word is for that specific cluster.
+
+- **MMR (Maximal Marginal Relevance):**
+   
+    - Selects keywords or documents that are relevant to the query/cluster while making sure they are **diverse** and non-redundant.
+
+    - _RAG Use Case:_ Prevents the retriever from returning duplicate or identical documents.
+
+- **KeyBERTInspired:** Compares the average vector of a cluster with individual word vectors using Cosine Similarity to extract the most semantically relevant words.
+
+- **LLM Labeling (Text Generation Block):**
+
+    - Instead of sending millions of documents to an LLM, c-TF-IDF selects the top 3–4 most representative documents and keywords.
+    
+    - The LLM (GPT-3.5/4 or an open-source model) receives only this short summary to generate a clean topic label, saving significant time and API costs.
+
+
+#### 6.  Topic Modeling Fundamentals
+
+- **Core Concept:** Goes beyond text clustering by automatically discovering latent themes across large collections of text (a corpus).
+
+- **The Evolution:**
+
+    - **Traditional Methods (LDA):** Relies on statistical word counts (Bag-of-Words) and completely misses word context and semantic meaning.
+
+    - **Transition from Clustering to Topic Modeling:** Grouping documents (e.g., sign language papers) is **Clustering**; identifying that cluster's topic as _"Sign Language Translation"_ and extracting top keywords is **Topic Modeling**.
+
+    - **Modern Approach (BERTopic):** Combines Transformer embeddings for semantic clustering, c-TF-IDF for key term weighting, and LLMs for clean topic labeling.
+
+- **Why It Matters for RAG:**
+
+    - **Automatic Vector DB Tagging:** Automatically categorizes thousands of stored documents without human effort.
+
+    - **Cost-Effective LLM Calls:** Instead of calling an LLM millions of times for every document, you run c-TF-IDF first and call the LLM only once per topic (e.g., 50 times) to generate clean labels.
+
+
+## Chapter 6: Prompt Engineering
+
+### Sampling Parameters and Output Control
+
+Controlling LLM outputs begins with properly adjusting sampling parameters. **Temperature** regulates output randomness and creativity; while `temperature = 0` is used for tasks requiring high consistency such as RAG systems or JSON generation, higher values (`0.7+`) are preferred for creative tasks. **Top_p (Nucleus Sampling)** dynamically selects a pool of tokens whose cumulative probability reaches a defined threshold $p$ (e.g., 90%), whereas **Top_k** restricts the selection strictly to the top $k$ most probable tokens.
+
+### Modular Prompt Construction
+
+Breaking complex prompts into distinct modular components significantly improves the model's instruction-following accuracy. An effective prompt structure includes the following elements:
+
+- **Persona:** The identity or expertise the model should assume (e.g., _"You are an expert in astrophysics"_).
+
+- **Instruction:** The primary core task the model must execute.
+
+- **Context:** Background information clarifying the boundaries and reasoning of the task.
+
+- **Format Constraints:** The exact structural layout expected for the output (e.g., JSON, Pydantic schema, bullet points).
+
+- **Audience & Tone:** The target audience and intended style of the text (e.g., formal, clear, ELI5).
+- 
+### In-Context Learning
+
+A technique where the model is guided using explicit demonstrations rather than written rules alone. It is applied across three levels: **Zero-Shot** (no examples), **One-Shot** (a single example), and **Few-Shot** (multiple examples provided to guarantee formatting and reasoning patterns).
+
+  
+
+### Reasoning Strategies (System 1 vs. System 2 Thinking)
+
+Techniques designed to emulate logical, step-by-step human reasoning (System 2) to prevent the model from making fast but incorrect guesses (System 1):
+
+- **Chain-of-Thought (CoT):** Forces the model to output intermediate reasoning steps before returning the final answer. This can be triggered via Few-Shot examples or simple phrases like _"Let's think step-by-step"_ (Zero-Shot CoT).
+
+- **Self-Consistency:** Generates $n$ independent answers for the same prompt using varied sampling paths and selects the most frequent final result through majority voting.
+
+- **Tree-of-Thought (ToT):** Explores multiple alternative reasoning branches for a problem, rates these branches, and prunes invalid paths to arrive at the optimal solution.
+
+### Output Verification and Constrained Sampling
+
+Validation methods used to prevent LLM outputs from breaking downstream application logic in production. This can be achieved through prompt-based validation (using few-shot examples or secondary LLM validator calls) or directly during inference via **Grammar-Constrained Sampling** (e.g., enforcing a JSON Schema), which guarantees 100% valid, syntax-error-free JSON outputs.
